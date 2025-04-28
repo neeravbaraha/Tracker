@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Planner</title>
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #166088;
+            --accent: #4fc3f7;
+            --light: #f5f5f5;
+            --dark: #333;
+            --success: #66bb6a;
+            --warning: #ffa726;
+            --danger: #ef5350;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f0f2f5;
+            color: var(--dark);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .login-form {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+        
+        .login-form h2 {
+            margin-bottom: 20px;
+            color: var(--primary);
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary);
+        }
+        
+        .error-message {
+            color: var(--danger);
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+        
+        #app {
+            display: none;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo h1 {
+            font-size: 24px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info span {
+            margin-right: 15px;
+        }
+        
+        .logout-btn {
+            background-color: transparent;
+            border: 1px solid white;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background-color: white;
+            color: var(--primary);
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+        }
+        
+        .tasks-section, .sidebar {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .add-task {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .add-task input {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+            font-size: 16px;
+        }
+        
+        .add-task button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+        
+        .task-list {
+            list-style-type: none;
+        }
+        
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .task-checkbox {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .task-text {
+            flex-grow: 1;
+            font-size: 16px;
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .task-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #777;
+            transition: color 0.3s;
+        }
+        
+        .task-actions button:hover {
+            color: var(--primary);
+        }
+        
+        .delete-btn:hover {
+            color: var(--danger);
+        }
+        
+        .task-completed .task-text {
+            text-decoration: line-through;
+            color: #999;
+        }
+        
+        .progress-section {
+            margin-bottom: 30px;
+        }
+        
+        .progress-bar-container {
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: var(--success);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .stat-card {
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .user-info {
+                margin-top: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-container">
+        <div class="login-form">
+            <h2>Daily Planner</h2>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" class="form-control" placeholder="Enter username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" class="form-control" placeholder="Enter password">
+            </div>
+            <button id="login-btn" class="btn">Login</button>
+            <p id="login-error" class="error-message">Invalid username or password</p>
+        </div>
+    </div>
+    
+    <!-- Main App -->
+    <div id="app">
+        <header>
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">
+                        <h1>Daily Planner</h1>
+                    </div>
+                    <div class="user-info">
+                        <span id="user-display">Welcome, Admin</span>
+                        <button id="logout-btn" class="logout-btn">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="container">
+            <div class="dashboard">
+                <div class="tasks-section">
+                    <div class="section-title">
+                        <h2>Today's Tasks</h2>
+                        <span id="current-date"></span>
+                    </div>
+                    
+                    <div class="add-task">
+                        <input type="text" id="new-task" placeholder="Add a new task...">
+                        <button id="add-task-btn">Add</button>
+                    </div>
+                    
+                    <ul id="task-list" class="task-list">
+                        <!-- Tasks will be added here by JavaScript -->
+                    </ul>
+                </div>
+                
+                <div class="sidebar">
+                    <div class="progress-section">
+                        <div class="section-title">
+                            <h3>Daily Progress</h3>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div id="progress-bar" class="progress-bar"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span id="tasks-completed">0 completed</span>
+                            <span id="completion-percentage">0%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="section-title">
+                        <h3>Statistics</h3>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div id="total-tasks" class="stat-value">0</div>
+                            <div class="stat-label">Total Tasks</div>
+                        </div>
+                        <div class="stat-card">
+                            <div id="completed-tasks" class="stat-value">0</div>
+                            <div class="stat-label">Completed</div>
+                        </div>
+                        <div class="stat-card">
+                            <div id="productivity-score" class="stat-value">0%</div>
+                            <div class="stat-label">Productivity</div>
+                        </div>
+                        <div class="stat-card">
+                            <div id="streak-count" class="stat-value">0</div>
+                            <div class="stat-label">Day Streak</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Default credentials
+        const DEFAULT_USERNAME = 'admin';
+        const DEFAULT_PASSWORD = 'admin@123';
+        
+        // DOM Elements
+        const loginScreen = document.getElementById('login-screen');
+        const appScreen = document.getElementById('app');
+        const loginBtn = document.getElementById('login-btn');
+        const loginError = document.getElementById('login-error');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userDisplay = document.getElementById('user-display');
+        const currentDateEl = document.getElementById('current-date');
+        const newTaskInput = document.getElementById('new-task');
+        const addTaskBtn = document.getElementById('add-task-btn');
+        const taskList = document.getElementById('task-list');
+        const progressBar = document.getElementById('progress-bar');
+        const tasksCompletedEl = document.getElementById('tasks-completed');
+        const completionPercentageEl = document.getElementById('completion-percentage');
+        const totalTasksEl = document.getElementById('total-tasks');
+        const completedTasksEl = document.getElementById('completed-tasks');
+        const productivityScoreEl = document.getElementById('productivity-score');
+        const streakCountEl = document.getElementById('streak-count');
+        
+        // State
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        let user = JSON.parse(localStorage.getItem('user')) || null;
+        let streak = JSON.parse(localStorage.getItem('streak')) || {
+            count: 0,
+            lastActive: null
+        };
+        
+        // Initialize the app
+        function init() {
+            displayCurrentDate();
+            checkLoginStatus();
+            checkStreak();
+            renderTasks();
+            updateStats();
+        }
+        
+        // Display current date
+        function displayCurrentDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date().toLocaleDateString('en-US', options);
+            currentDateEl.textContent = today;
+        }
+        
+        // Check login status
+        function checkLoginStatus() {
+            if (user && user.isLoggedIn) {
+                loginScreen.style.display = 'none';
+                appScreen.style.display = 'block';
+                userDisplay.textContent = `Welcome, ${user.username}`;
+            } else {
+                loginScreen.style.display = 'flex';
+                appScreen.style.display = 'none';
+            }
+        }
+        
+        // Handle login
+        function handleLogin() {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            if (username === DEFAULT_USERNAME && password === DEFAULT_PASSWORD) {
+                user = {
+                    username: username,
+                    isLoggedIn: true
+                };
+                localStorage.setItem('user', JSON.stringify(user));
+                loginError.style.display = 'none';
+                checkLoginStatus();
+            } else {
+                loginError.style.display = 'block';
+            }
+        }
+        
+        // Handle logout
+        function handleLogout() {
+            user = null;
+            localStorage.removeItem('user');
+            checkLoginStatus();
+            usernameInput.value = '';
+            passwordInput.value = '';
+        }
+        
+        // Add task
+        function addTask() {
+            const taskText = newTaskInput.value.trim();
+            if (taskText) {
+                const newTask = {
+                    id: Date.now(),
+                    text: taskText,
+                    completed: false,
+                    createdAt: new Date()
+                };
+                
+                tasks.push(newTask);
+                saveTasks();
+                renderTasks();
+                updateStats();
+                newTaskInput.value = '';
+            }
+        }
+        
+        // Toggle task completion
+        function toggleTaskCompletion(taskId) {
+            tasks = tasks.map(task => {
+                if (task.id === taskId) {
+                    return { ...task, completed: !task.completed };
+                }
+                return task;
+            });
+            
+            saveTasks();
+            renderTasks();
+            updateStats();
+        }
+        
+        // Delete task
+        function deleteTask(taskId) {
+            tasks = tasks.filter(task => task.id !== taskId);
+            saveTasks();
+            renderTasks();
+            updateStats();
+        }
+        
+        // Render tasks
+        function renderTasks() {
+            taskList.innerHTML = '';
+            
+            if (tasks.length === 0) {
+                const emptyMessage = document.createElement('p');
+                emptyMessage.textContent = 'No tasks yet. Add a task to get started!';
+                emptyMessage.style.textAlign = 'center';
+                emptyMessage.style.color = '#999';
+                emptyMessage.style.padding = '20px 0';
+                taskList.appendChild(emptyMessage);
+                return;
+            }
+            
+            tasks.forEach(task => {
+                const li = document.createElement('li');
+                li.className = `task-item ${task.completed ? 'task-completed' : ''}`;
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'task-checkbox';
+                checkbox.checked = task.completed;
+                checkbox.addEventListener('change', () => toggleTaskCompletion(task.id));
+                
+                const textSpan = document.createElement('span');
+                textSpan.className = 'task-text';
+                textSpan.textContent = task.text;
+                
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'task-actions';
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.innerHTML = '❌';
+                deleteBtn.addEventListener('click', () => deleteTask(task.id));
+                
+                actionsDiv.appendChild(deleteBtn);
+                
+                li.appendChild(checkbox);
+                li.appendChild(textSpan);
+                li.appendChild(actionsDiv);
+                
+                taskList.appendChild(li);
+            });
+        }
+        
+        // Update statistics
+        function updateStats() {
+            const totalTasks = tasks.length;
+            const completedTasks = tasks.filter(task => task.completed).length;
+            const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+            
+            // Update progress bar
+            progressBar.style.width = `${completionPercentage}%`;
+            
+            // Update progress text
+            tasksCompletedEl.textContent = `${completedTasks} completed`;
+            completionPercentageEl.textContent = `${completionPercentage}%`;
+            
+            // Update stat cards
+            totalTasksEl.textContent = totalTasks;
+            completedTasksEl.textContent = completedTasks;
+            productivityScoreEl.textContent = `${completionPercentage}%`;
+            streakCountEl.textContent = streak.count;
+        }
+        
+        // Check streak
+        function checkStreak() {
+            const today = new Date().toDateString();
+            
+            if (!streak.lastActive) {
+                // First time using the app
+                streak.count = 1;
+                streak.lastActive = today;
+            } else if (streak.lastActive !== today) {
+                const lastActiveDate = new Date(streak.lastActive);
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (lastActiveDate.toDateString() === yesterday.toDateString()) {
+                    // User was active yesterday, increment streak
+                    streak.count++;
+                } else {
+                    // User missed a day, reset streak
+                    streak.count = 1;
+                }
+                
+                streak.lastActive = today;
+            }
+            
+            localStorage.setItem('streak', JSON.stringify(streak));
+        }
+        
+        // Save tasks to localStorage
+        function saveTasks() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+        
+        // Event Listeners
+        loginBtn.addEventListener('click', handleLogin);
+        logoutBtn.addEventListener('click', handleLogout);
+        addTaskBtn.addEventListener('click', addTask);
+        
+        newTaskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addTask();
+            }
+        });
+        
+        // Initialize app
+        init();
+    </script>
+</body>
+</html>
